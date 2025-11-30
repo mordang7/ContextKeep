@@ -1,66 +1,161 @@
+<div align="center">
+
+![ContextKeep Banner](assets/banner.png)
+
 # ContextKeep 🧠
-**Infinite Long-Term Memory for your AI**
+### Infinite Long-Term Memory for AI Agents
 
-ContextKeep is a digital notebook for your AI. It allows your AI (like Claude, Cursor, or VS Code) to remember your project details, preferences, and past conversations forever.
+[![Status: Beta](https://img.shields.io/badge/Status-Beta-blue?style=for-the-badge)](https://github.com/mordang7/ContextKeep)
+[![Platform: Linux | Windows | macOS](https://img.shields.io/badge/Platform-Linux%20%7C%20Windows%20%7C%20macOS-lightgrey?style=for-the-badge)](https://github.com/mordang7/ContextKeep)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](https://opensource.org/licenses/MIT)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg?style=for-the-badge)](https://www.python.org/downloads/)
+[![MCP Compliant](https://img.shields.io/badge/MCP-Compliant-green.svg?style=for-the-badge)](https://modelcontextprotocol.io/)
+[![Donate](https://img.shields.io/badge/Donate-PayPal-blue.svg?style=for-the-badge&logo=paypal)](https://www.paypal.com/paypalme/GeekJohn)
 
-## Why use ContextKeep?
-- **Stop Repeating Yourself**: Don't paste the same project context over and over.
-- **Save Money**: Reduce token usage by only retrieving what's needed.
-- **Privacy First**: Your data stays on your machine.
+**ContextKeep** is a powerful, standalone memory server that gives your AI tools (Claude, Cursor, VS Code, Gemini, OpenCode) a persistent, searchable brain. Stop repeating yourself—let your AI remember.
 
----
+[Features](#-features) • [Installation](#-installation) • [Usage](#-usage) • [Web Dashboard](#-web-dashboard) • [Configuration](#-configuration)
 
-## 🚀 Quick Start Guide
-
-### 1. Installation
-1.  **Download** this folder to your computer.
-2.  **Run the Installer**:
-    - **Windows**: Double-click `install.py` (if Python is installed) or run `python install.py` in a terminal.
-    - **Linux/Mac**: Run `python3 install.py` in a terminal.
-3.  **Follow the prompts**: The installer will set everything up for you.
-
-### 2. Connect to your AI
-The installer will generate a file called `mcp_config.json`.
-1.  Open `mcp_config.json`.
-2.  Copy the contents.
-3.  Paste it into your AI's configuration file (e.g., `claude_desktop_config.json` or your IDE's MCP settings).
-4.  **Restart your AI**.
-
-### 3. Start Using It!
-Just talk to your AI naturally. It now has new tools to remember things.
-
-**Examples:**
-- "Remember that my server IP is 192.168.1.50"
-- "What was I working on yesterday?"
-- "Search my memories for 'database schema'"
+</div>
 
 ---
 
-## 🌐 Web Interface
-ContextKeep comes with a beautiful dashboard to view and manage your memories.
-- **URL**: `http://localhost:5000`
-- **Features**: Calendar view, search, edit, and delete memories manually.
+## 🌟 Features
 
-To start the WebUI manually, run:
+*   **♾️ Infinite Context:** Store unlimited project details, preferences, and snippets.
+*   **🔌 Universal Compatibility:** Works with *any* MCP-compliant client via Stdio (Local) or SSE (Remote).
+*   **🖥️ Modern Web Dashboard:** Manage your memories visually with Grid, List, and Calendar views.
+*   **🔒 Privacy First:** 100% local storage. Your data never leaves your machine.
+*   **🔎 Smart Search:** Find exactly what you need with semantic and keyword search.
+*   **🐧 Linux Service:** Runs silently in the background as a system service.
+
+---
+
+## 🚀 Installation
+
+### Prerequisites
+*   Python 3.10 or higher
+*   Git (optional)
+
+### Quick Start
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/mordang7/ContextKeep.git
+    cd ContextKeep
+    ```
+
+2.  **Run the Installer:**
+    *   **Linux/Mac:**
+        ```bash
+        python3 install.py
+        ```
+    *   **Windows:**
+        ```powershell
+        python install.py
+        ```
+
+3.  **Follow the Wizard:** The installer will create a virtual environment, install dependencies, and generate a custom configuration file for you.
+
+---
+
+## 🔌 Configuration
+
+After installation, you will find a `mcp_config.json` file in the root directory. Copy its contents into your AI client's configuration.
+
+### Example Configurations
+
+#### 1. Claude Desktop / Gemini CLI (Local)
+```json
+{
+  "mcpServers": {
+    "context-keep": {
+      "command": "/absolute/path/to/ContextKeep/venv/bin/python",
+      "args": ["/absolute/path/to/ContextKeep/server.py"]
+    }
+  }
+}
+```
+
+#### 2. Remote Access (SSH)
+Perfect for running ContextKeep on a home server (e.g., Raspberry Pi) and accessing it from your laptop.
+```json
+{
+  "mcpServers": {
+    "context-keep": {
+      "command": "ssh",
+      "args": [
+        "-i", "/path/to/private_key",
+        "user@192.168.1.X",
+        "'/path/to/ContextKeep/venv/bin/python'",
+        "'/path/to/ContextKeep/server.py'"
+      ]
+    }
+  }
+}
+```
+
+#### 3. SSE Mode (Http)
+If you prefer HTTP transport (great for OpenCode or web apps):
+```json
+{
+  "mcpServers": {
+    "context-keep": {
+      "transport": "sse",
+      "url": "http://localhost:5100/sse"
+    }
+  }
+}
+```
+
+---
+
+## 🌐 Web Dashboard
+
+ContextKeep includes a beautiful web interface to manage your memories.
+
+*   **URL:** `http://localhost:5000`
+*   **Features:**
+    *   **Dashboard:** Overview of recent memories.
+    *   **Calendar:** Visual timeline of your work.
+    *   **Search:** Instant filtering.
+    *   **CRUD:** Create, Read, Update, Delete memories manually.
+
+**To start it manually:**
 ```bash
 ./venv/bin/python webui.py
 ```
-*(Or use the `python` executable in the `venv/Scripts` folder on Windows)*
 
 ---
 
-## 🐧 Linux/WSL Service Setup (Optional)
-If you are on Linux, you can make ContextKeep run automatically in the background.
+## 🐧 Linux Service Setup (Optional)
 
-1.  Run the service installer:
-    ```bash
-    chmod +x install_services.sh
-    ./install_services.sh
-    ```
-2.  That's it! ContextKeep will now start when your computer turns on.
+Run ContextKeep as a background service (systemd) on Linux/WSL:
+
+```bash
+chmod +x install_services.sh
+./install_services.sh
+```
+
+This will install:
+*   `contextkeep-server` (Port 5100)
+*   `contextkeep-webui` (Port 5000)
 
 ---
 
-## 🛠️ Advanced
-- **Configuration**: See `mcp_config.example.json` for manual setup.
-- **Logs**: Check the `logs/` folder if something goes wrong.
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## ☕ Support the Project
+
+If ContextKeep helps you build cool things, consider buying me a coffee!
+
+<a href="https://www.paypal.com/paypalme/GeekJohn">
+  <img src="https://img.shields.io/badge/Donate-PayPal-blue.svg?style=for-the-badge&logo=paypal" alt="Donate with PayPal" />
+</a>
+
+---
+
+<div align="center">
+  <sub>Built with ❤️ by GeekJohn</sub>
+</div>
