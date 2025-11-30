@@ -1,7 +1,5 @@
 <div align="center">
 
-<img src="assets/logo.png" width="200" height="200" alt="ContextKeep Logo">
-
 ![ContextKeep Banner](assets/banner.png)
 
 # ContextKeep 🧠
@@ -25,6 +23,7 @@
 ## 🌟 Features
 
 *   **♾️ Infinite Context:** Store unlimited project details, preferences, and snippets.
+*   **💰 Save Money & Tokens:** Reduce context window usage by only retrieving relevant memories, lowering API costs.
 *   **🔌 Universal Compatibility:** Works with *any* MCP-compliant client via Stdio (Local) or SSE (Remote).
 *   **🖥️ Modern Web Dashboard:** Manage your memories visually with Grid, List, and Calendar views.
 *   **🔒 Privacy First:** 100% local storage. Your data never leaves your machine.
