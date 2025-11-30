@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="assets/logo.png" width="200" height="200" alt="ContextKeep Logo">
+
 ![ContextKeep Banner](assets/banner.png)
 
 # ContextKeep 🧠
