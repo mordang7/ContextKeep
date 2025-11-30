@@ -32,6 +32,10 @@
 
 ---
 
+![ContextKeep Showcase](assets/Showcase.png)
+
+---
+
 ## 🚀 Installation
 
 ### Prerequisites
