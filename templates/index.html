@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ContextKeep V1.0 - Memory Manager</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🧠 ContextKeep Memory Manager</h1>
+            <p class="subtitle">V1.0</p>
+        </header>
+
+        <div class="toolbar">
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Search by title, key, or content..." />
+            </div>
+            <div class="view-controls">
+                <button id="gridViewBtn" class="btn btn-secondary active">Grid</button>
+                <button id="listViewBtn" class="btn btn-secondary">List</button>
+                <button id="calendarViewBtn" class="btn btn-secondary">Calendar</button>
+                <button id="newMemoryBtn" class="btn btn-primary">+ New Memory</button>
+            </div>
+        </div>
+
+        <div id="memoriesContainer" class="memories-grid">
+            <!-- Memory cards will be injected here -->
+        </div>
+
+        <div id="calendarContainer" class="calendar-view" style="display: none;">
+            <div id="calendarGrid"></div>
+            <div id="calendarList" class="calendar-list"></div>
+        </div>
+    </div>
+
+    <!-- New Memory Modal -->
+    <div id="newMemoryModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Create New Memory</h2>
+            <input type="text" id="newKey" class="edit-title" placeholder="Memory Key (unique identifier)" />
+            <input type="text" id="newTitle" class="edit-title" placeholder="Title" />
+            <textarea id="newContent" class="edit-content" placeholder="Content"></textarea>
+            <div class="modal-actions">
+                <button id="saveNewBtn" class="btn btn-primary">Create</button>
+                <button class="btn btn-secondary close">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Modal -->
+    <div id="viewModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="viewTitle"></h2>
+            <p class="meta"><strong>Key:</strong> <span id="viewKey"></span></p>
+            <p class="meta"><strong>Updated:</strong> <span id="viewTimestamp"></span></p>
+            <div id="viewContent" class="content-area"></div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Edit Memory</h2>
+            <input type="text" id="editTitle" class="edit-title" placeholder="Title" />
+            <textarea id="editContent" class="edit-content" placeholder="Content"></textarea>
+            <div class="modal-actions">
+                <button id="saveEditBtn" class="btn btn-primary">Save</button>
+                <button class="btn btn-secondary close">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <h2>⚠️ Confirm Deletion</h2>
+            <p>Are you sure you want to delete this memory?</p>
+            <p><strong id="deleteTitle"></strong></p>
+            <div class="modal-actions">
+                <button id="confirmDeleteBtn" class="btn btn-danger">Delete</button>
+                <button class="btn btn-secondary close">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+
+</html>

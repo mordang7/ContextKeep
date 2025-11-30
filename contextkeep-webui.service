@@ -1,0 +1,16 @@
+[Unit]
+Description=ContextKeep V1.0 - Memory Management Web Service
+After=network.target
+
+[Service]
+Type=simple
+User={{USER}}
+WorkingDirectory={{WORKDIR}}
+ExecStart="{{WORKDIR}}/venv/bin/python" webui.py
+Restart=always
+RestartSec=10
+StandardOutput=append:{{WORKDIR}}/logs/contextkeep_webui.log
+StandardError=append:{{WORKDIR}}/logs/contextkeep_webui_error.log
+
+[Install]
+WantedBy=multi-user.target

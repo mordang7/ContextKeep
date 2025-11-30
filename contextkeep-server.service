@@ -1,0 +1,16 @@
+[Unit]
+Description=ContextKeep V1.0 MCP Server (SSE)
+After=network.target
+
+[Service]
+Type=simple
+User={{USER}}
+WorkingDirectory={{WORKDIR}}
+ExecStart="{{WORKDIR}}/venv/bin/python" server.py --transport sse --host 0.0.0.0 --port 5100
+Restart=always
+RestartSec=10
+StandardOutput=append:{{WORKDIR}}/logs/contextkeep_server.log
+StandardError=append:{{WORKDIR}}/logs/contextkeep_server_error.log
+
+[Install]
+WantedBy=multi-user.target
