@@ -10,7 +10,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg?style=for-the-badge)](https://www.python.org/downloads/)
 [![MCP Compliant](https://img.shields.io/badge/MCP-Compliant-green.svg?style=for-the-badge)](https://modelcontextprotocol.io/)
-[![Donate](https://img.shields.io/badge/Donate-PayPal-blue.svg?style=for-the-badge&logo=paypal)](https://www.paypal.com/paypalme/GeekJohn)
+[![Donate with PayPal](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.com/paypalme/GeekJohn)
 
 **ContextKeep** is a powerful, standalone memory server that gives your AI tools (Claude, Cursor, VS Code, Gemini, OpenCode) a persistent, searchable brain. Stop repeating yourself—let your AI remember.
 
@@ -155,9 +155,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 If ContextKeep helps you build cool things, consider buying me a coffee!
 
-<a href="https://www.paypal.com/paypalme/GeekJohn">
-  <img src="https://img.shields.io/badge/Donate-PayPal-blue.svg?style=for-the-badge&logo=paypal" alt="Donate with PayPal" />
-</a>
+[![Donate with PayPal](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.com/paypalme/GeekJohn)
 
 ---
 
