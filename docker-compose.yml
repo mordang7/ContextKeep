@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  mcp-server:
+    build: .
+    container_name: contextkeep-server
+    ports:
+      - "5100:5100"
+    volumes:
+      - contextkeep-data:/app/data
+    restart: unless-stopped
+    command: ["python", "server.py", "--transport", "sse", "--host", "0.0.0.0", "--port", "5100"]
+
+  webui:
+    build: .
+    container_name: contextkeep-webui
+    ports:
+      - "5000:5000"
+    volumes:
+      - contextkeep-data:/app/data
+    restart: unless-stopped
+    command: ["python", "webui.py"]
+
+volumes:
+  contextkeep-data:
+    name: contextkeep-data

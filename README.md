@@ -88,10 +88,32 @@ Grid view cards now show:
 ## 🚀 Installation
 
 ### Prerequisites
-*   Python 3.10 or higher
+*   Python 3.10 or higher (if running locally)
+*   Docker & Docker Compose (optional, for containerised deployment)
 *   Git (optional)
 
-### Quick Start
+### Docker Deployment (Recommended)
+
+The easiest way to run ContextKeep is using Docker Compose. This runs both the MCP Server (SSE) and the WebUI in isolated containers with a shared volume for persistent memory storage.
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/mordang7/ContextKeep.git
+    cd ContextKeep
+    ```
+
+2.  **Start the services:**
+    ```bash
+    docker compose up -d
+    ```
+
+This will expose:
+*   **WebUI:** `http://localhost:5000`
+*   **MCP Server (SSE):** `http://localhost:5100/sse`
+
+Your data is safely stored in a Docker volume (`contextkeep-data`) so it persists between restarts.
+
+### Local Installation
 
 1.  **Clone the repository:**
     ```bash
