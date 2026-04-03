@@ -1,9 +1,12 @@
 {
   "mcpServers": {
     "context-keep": {
-      "command": "/usr/bin/python3.12",
+      "command": "uv",
       "args": [
-        "/home/shared/AI_CLI_Projects/J_Useful_Apps/ContextKeep Beta V1.0 Release/server.py"
+        "--directory",
+        "/home/shared/AI_CLI_Projects/J_Useful_Apps/ContextKeep Beta V1.0 Release/server.py",
+        "run",
+        "server.py"
       ]
     }
   }

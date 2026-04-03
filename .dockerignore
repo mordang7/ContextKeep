@@ -1,0 +1,12 @@
+# Ignore everything
+*
+
+# Except
+!assets/
+!core/
+!static/
+!templates/
+!server.py
+!webui.py
+!pyproject.toml
+!uv.lock

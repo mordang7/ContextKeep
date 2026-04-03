@@ -147,8 +147,13 @@ Copy the contents of `mcp_config.example.json` into your AI client's config file
 {
   "mcpServers": {
     "context-keep": {
-      "command": "/absolute/path/to/ContextKeep/venv/bin/python",
-      "args": ["/absolute/path/to/ContextKeep/server.py"]
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/absolute/path/to/ContextKeep/server.py",
+        "run",
+        "server.py"
+      ]
     }
   }
 }
@@ -185,6 +190,30 @@ Ideal for OpenCode, web apps, or any client that prefers HTTP transport:
 }
 ```
 
+### Option 4: Local Mode (Docker)
+Ideal for OpenCode, web apps, or any client that prefers HTTP transport:
+
+Currently requires building the image first with `docker build -t context-keep .`  
+and creating a docker volume for persistent storage with `docker volume create context-keep`
+
+```json
+{
+  "mcpServers": {
+    "context-keep": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-v",
+        "context-keep:/app/data",
+        "context-keep:latest"
+      ]
+    }
+  }
+}
+```
+
 ---
 
 ## 🌐 Web Dashboard
@@ -200,7 +229,12 @@ ContextKeep ships with a full-featured web UI to manage your memories without to
 
 **To start manually:**
 ```bash
-./venv/bin/python webui.py
+uv run webui.py
+
+or
+
+docker run -i --rm -v "context-keep:/app/data" -p 5000:5000 context-keep:latest uv run webui.py
+
 ```
 
 ---

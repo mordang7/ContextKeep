@@ -1,0 +1,10 @@
+[project]
+name = "ContextKeep"
+version = "1.2.0"
+description = "Infinite Long-Term Memory for AI Agents"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastmcp>=3.2.0",
+    "flask>=3.1.3",
+]
