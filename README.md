@@ -191,8 +191,6 @@ Ideal for OpenCode, web apps, or any client that prefers HTTP transport:
 ```
 
 ### Option 4: Local Mode (Docker)
-Ideal for OpenCode, web apps, or any client that prefers HTTP transport:
-
 Currently requires building the image first with `docker build -t context-keep .`  
 and creating a docker volume for persistent storage with `docker volume create context-keep`
 
