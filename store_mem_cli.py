@@ -2,9 +2,6 @@ import sys
 import os
 from pathlib import Path
 
-# Add current directory to sys.path so we can import 'core'
-sys.path.append(os.getcwd())
-
 from core.memory_manager import memory_manager
 
 key = "Valheim_Plus_Forge_Project_State"

@@ -10,8 +10,6 @@ from pathlib import Path
 import sys
 import os
 
-# Add parent directory to path to import memory_manager
-sys.path.insert(0, str(Path(__file__).parent))
 from core.memory_manager import memory_manager
 
 app = Flask(__name__)
