@@ -1,4 +1,4 @@
-// ContextKeep V1.2 WebUI — Main JavaScript
+// ContextKeep V1.3 Harbor WebUI — Main JavaScript
 
 let memories = [];
 let currentKey = null;
@@ -43,6 +43,17 @@ function setupEventListeners() {
     document.getElementById('saveNewBtn').addEventListener('click', saveNewMemory);
     document.getElementById('saveEditBtn').addEventListener('click', saveEdit);
     document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDelete);
+
+    // Export button
+    document.getElementById('exportAllBtn').addEventListener('click', exportAll);
+
+    // Keyboard shortcut: Ctrl+E for export
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.key === 'e') {
+            e.preventDefault();
+            exportAll();
+        }
+    });
 }
 
 // ─── View Switching ───
@@ -341,4 +352,46 @@ function escapeHtml(text) {
 // Encode memory key safely for use in onclick attributes
 function encodeKey(key) {
     return escapeHtml(key).replace(/'/g, '&#39;');
+}
+
+// ─── Export All ───
+async function exportAll() {
+    try {
+        const btn = document.getElementById('exportAllBtn');
+        const originalText = btn.textContent;
+        btn.textContent = '⏳ Exporting...';
+        btn.disabled = true;
+
+        const response = await fetch('/api/export');
+        const blob = await response.blob();
+
+        // Extract filename from Content-Disposition header or generate one
+        const disposition = response.headers.get('Content-Disposition');
+        let filename = `contextkeep_backup_${new Date().toISOString().slice(0, 10)}.json`;
+        if (disposition && disposition.includes('filename=')) {
+            filename = disposition.split('filename=')[1].trim();
+        }
+
+        // Trigger download
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        a.remove();
+
+        btn.textContent = '✅ Exported!';
+        setTimeout(() => {
+            btn.textContent = originalText;
+            btn.disabled = false;
+        }, 2000);
+    } catch (error) {
+        console.error('Error exporting memories:', error);
+        alert('Error exporting memories');
+        const btn = document.getElementById('exportAllBtn');
+        btn.textContent = '⬇ Export';
+        btn.disabled = false;
+    }
 }

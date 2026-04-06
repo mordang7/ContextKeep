@@ -7,7 +7,7 @@ from pathlib import Path
 
 def print_header():
     print("="*60)
-    print("      ContextKeep V1.0 - Installation Wizard")
+    print("      ContextKeep V1.3 Harbor — Installation Wizard")
     print("="*60)
     print()
 
@@ -17,6 +17,10 @@ def check_python():
         print("[-] Error: Python 3.10 or higher is required.")
         sys.exit(1)
     print(f"[+] Python {sys.version_info.major}.{sys.version_info.minor} detected.")
+
+def check_uv():
+    """Check if uv is available on PATH."""
+    return shutil.which("uv") is not None
 
 def create_venv():
     print("\n[*] Setting up virtual environment...")
@@ -33,12 +37,24 @@ def create_venv():
     else:
         return venv_dir / "bin" / "python"
 
-def install_dependencies(python_path):
-    print("\n[*] Installing dependencies...")
+def install_with_uv():
+    """Install dependencies using uv (fast Python package manager)."""
+    print("\n[*] Installing dependencies with uv...")
+    try:
+        subprocess.check_call(["uv", "sync"])
+        print("[+] Dependencies installed via uv.")
+        return True
+    except subprocess.CalledProcessError as e:
+        print(f"[-] uv sync failed: {e}")
+        return False
+
+def install_with_pip(python_path):
+    """Install dependencies using pip (traditional method)."""
+    print("\n[*] Installing dependencies with pip...")
     try:
         subprocess.check_call([str(python_path), "-m", "pip", "install", "--upgrade", "pip"])
         subprocess.check_call([str(python_path), "-m", "pip", "install", "-r", "requirements.txt"])
-        print("[+] Dependencies installed.")
+        print("[+] Dependencies installed via pip.")
     except subprocess.CalledProcessError as e:
         print(f"[-] Error installing dependencies: {e}")
         sys.exit(1)
@@ -48,8 +64,6 @@ def generate_config(python_path):
     
     server_script = Path("server.py").resolve()
     
-    # Create the config dictionary
-    # We use the absolute path to the venv python and the server script
     config = {
         "mcpServers": {
             "context-keep": {
@@ -70,16 +84,35 @@ def main():
     print_header()
     check_python()
     
-    print("\nThis installer will set up a local virtual environment and")
-    print("install necessary dependencies for ContextKeep.")
-    print("It will also generate the configuration needed for your IDE.")
+    has_uv = check_uv()
     
-    if input("\nProceed? [Y/n]: ").lower().strip() == 'n':
+    print("\nThis installer will set up ContextKeep and install dependencies.")
+    if has_uv:
+        print("  ✓ uv detected — will use uv for fast installation.")
+    else:
+        print("  • uv not found — will use pip + venv (classic method).")
+        print("  💡 Tip: Install uv for faster setup: https://docs.astral.sh/uv/")
+    
+    print("\n🐳 Docker alternative: docker compose up --build")
+    
+    if input("\nProceed with local install? [Y/n]: ").lower().strip() == 'n':
         print("Installation aborted.")
         sys.exit(0)
-        
-    python_path = create_venv()
-    install_dependencies(python_path)
+    
+    if has_uv:
+        if install_with_uv():
+            # uv creates its own venv, get the python path from it
+            if os.name == "nt":
+                python_path = Path(".venv") / "Scripts" / "python.exe"
+            else:
+                python_path = Path(".venv") / "bin" / "python"
+        else:
+            print("[!] Falling back to pip...")
+            python_path = create_venv()
+            install_with_pip(python_path)
+    else:
+        python_path = create_venv()
+        install_with_pip(python_path)
     
     generate_config(python_path)
     
@@ -91,7 +124,7 @@ def main():
     print(f"2. Copy the contents of '{Path('mcp_config.json').resolve()}' into your config file.")
     print("3. Restart your IDE/Claude App.")
     print("\nYour memories will be stored in the 'data/memories' folder.")
-    print("\nEnjoy your new memory!")
+    print("\nEnjoy ContextKeep V1.3 Harbor! 🚀")
     
     input("\nPress Enter to exit...")
 

@@ -5,17 +5,18 @@
 # ContextKeep 🧠
 ### Infinite Long-Term Memory for AI Agents
 
-[![Version: 1.2](https://img.shields.io/badge/Version-1.2-brightgreen?style=for-the-badge)](https://github.com/mordang7/ContextKeep)
+[![Version: 1.3](https://img.shields.io/badge/Version-1.3-brightgreen?style=for-the-badge)](https://github.com/mordang7/ContextKeep)
 [![Status: Stable](https://img.shields.io/badge/Status-Stable-blue?style=for-the-badge)](https://github.com/mordang7/ContextKeep)
 [![Platform: Linux | Windows | macOS](https://img.shields.io/badge/Platform-Linux%20%7C%20Windows%20%7C%20macOS-lightgrey?style=for-the-badge)](https://github.com/mordang7/ContextKeep)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg?style=for-the-badge)](https://www.python.org/downloads/)
 [![MCP Compliant](https://img.shields.io/badge/MCP-Compliant-green.svg?style=for-the-badge)](https://modelcontextprotocol.io/)
+[![Docker Ready](https://img.shields.io/badge/Docker-Ready-2496ED.svg?style=for-the-badge&logo=docker&logoColor=white)](https://docs.docker.com/)
 [![Donate with PayPal](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.com/paypalme/GeekJohn)
 
 **ContextKeep** is a powerful, standalone memory server that gives your AI agents (Claude, Cursor, Gemini, OpenCode, and more) a persistent, searchable brain. Stop repeating yourself — let your AI remember everything, permanently.
 
-[Features](#-features) • [What's New in V1.2](#-whats-new-in-v12) • [Installation](#-installation) • [MCP Tools](#-mcp-tools) • [Web Dashboard](#-web-dashboard) • [Configuration](#-configuration)
+[Features](#-features) • [What's New in V1.3](#-whats-new-in-v13---harbor) • [Installation](#-installation) • [MCP Tools](#-mcp-tools) • [Web Dashboard](#-web-dashboard) • [Configuration](#-configuration)
 
 </div>
 
@@ -31,6 +32,8 @@
 *   **🔒 Privacy First:** 100% local storage. Your data never touches an external server.
 *   **🔎 Smart Search:** Keyword and semantic search across all memory content.
 *   **🐧 Linux Service:** Runs silently in the background as a systemd service.
+*   **🐳 Docker Ready:** One-command deployment with Docker Compose.
+*   **⬇️ Export & Backup:** Export all memories as JSON via MCP tool or WebUI.
 
 ---
 
@@ -38,60 +41,44 @@
 
 ---
 
-## 🆕 What's New in V1.2
+## 🆕 What's New in V1.3 — Harbor
 
-### 🧭 `list_all_memories()` — The Memory Index Tool
-The headline feature of V1.2. Agents can now call `list_all_memories()` to receive a complete directory of every stored memory — key, title, tags, and last-updated timestamp — in a single call. This eliminates unreliable fuzzy key guessing and makes memory retrieval 100% deterministic.
+### 🐳 Docker Support
+The #1 community request. ContextKeep now ships with a `Dockerfile` and `docker-compose.yml` for one-command deployment:
 
-```
-📚 Memory Directory — 140 total memories:
-==================================================
-
-🔑 Key:     GJ_Personal_Setup_Master
-   Title:   Personal System Specifications (Master Record)
-   Tags:    setup, specs, desktop, homelab
-   Updated: 2026-02-19T12:37
-
-🔑 Key:     GeekJ_Video_Shield_vs_Streamer_2026
-   Title:   GeekJ Video: Shield TV Pro vs Google TV Streamer 4K
-   Tags:    GeekJ, YouTube, video, streaming
-   Updated: 2026-02-10T22:06
-...
+```bash
+docker compose up --build
 ```
 
-**The recommended retrieval protocol for agents:**
-> **Step 1:** Call `list_all_memories()` → scan the directory for the exact key.
-> **Step 2:** Call `retrieve_memory(exact_key)` → fetch the full content.
->
-> Only use `search_memories()` for content-based searches, not key lookup.
+That's it. MCP server on `:5100`, WebUI on `:5000`, with persistent storage via Docker volumes.
 
----
+### 📦 Modern Python Packaging
+- **`pyproject.toml`** — canonical dependency spec for `uv`, `poetry`, or `pip`
+- **`uv` support** — the installer auto-detects `uv` and uses `uv sync` for blazing-fast setup
+- **Backwards compatible** — `pip install -r requirements.txt` still works
 
-### 🎨 Obsidian Lab UI Redesign
-The web dashboard has been completely reskinned with a premium dark "Obsidian Lab" aesthetic:
-- Deep navy background with electric cyan (`#00e5ff`) accents
-- JetBrains Mono for memory keys — instantly distinguishable at a glance
-- Violet tag chips on Grid cards
-- Live memory count badge in the top-right header
+### 🛠️ 3 New MCP Tools (5 → 8 total)
 
-### 📅 Enhanced Calendar View
-- Full month navigation — scroll forward and backward through your memory timeline
-- Cleaned-up layout — the "Recent Memories" sidebar has been removed for a focused, distraction-free calendar experience
+| New Tool | Purpose |
+|----------|---------|
+| `delete_memory(key)` | Agents can now delete memories directly |
+| `get_memory_stats()` | Memory count, total chars, storage path at a glance |
+| `export_memories()` | Full backup as JSON — for migration or archival |
 
-### 🃏 Richer Grid Cards
-Grid view cards now show:
-- **Tag chips** — all tags displayed as coloured pills directly on the card
-- **Character count badge** — instant size indicator per memory (e.g. `2.1k chars`)
+### ⬇️ WebUI Export
+- **Export All** button in the toolbar (or press `Ctrl+E`)
+- Downloads a timestamped `contextkeep_backup_YYYY-MM-DD.json`
+
+### 🧹 Code Quality
+- Fixed dead code in `memory_manager.py` (unreachable duplicate `try/except`)
+- Added missing `core/__init__.py` for proper Python packaging
+- Replaced bare `except:` with `except Exception:` throughout
 
 ---
 
 ## 🚀 Installation
 
-### Prerequisites
-*   Python 3.10 or higher
-*   Git (optional)
-
-### Quick Start
+### Option 1: Quick Start (pip)
 
 1.  **Clone the repository:**
     ```bash
@@ -111,19 +98,47 @@ Grid view cards now show:
 
 3.  **Follow the Wizard:** The installer creates a virtual environment, installs dependencies, and generates a ready-to-use `mcp_config.json`.
 
+### Option 2: uv (Fast)
+
+```bash
+git clone https://github.com/mordang7/ContextKeep.git
+cd ContextKeep
+uv sync
+uv run python server.py
+```
+
+### Option 3: Docker (Recommended for Homelabs)
+
+```bash
+git clone https://github.com/mordang7/ContextKeep.git
+cd ContextKeep
+docker compose up --build -d
+```
+
+This starts:
+| Service | Port | Purpose |
+|---------|------|---------|
+| `mcp-server` | `5100` | MCP server (SSE transport) |
+| `webui` | `5000` | Web dashboard |
+
+Memories persist in a Docker volume (`contextkeep-data`).
+
 ---
 
 ## 🛠️ MCP Tools
 
-ContextKeep exposes **5 MCP tools** to any connected agent:
+ContextKeep exposes **8 MCP tools** to any connected agent:
 
 | Tool | Signature | Purpose |
-|------|-----------|---------|
+|------|-----------|---------| 
 | `list_all_memories` | *(no args)* | **[USE FIRST]** Returns a full directory of all memory keys, titles, tags, and timestamps |
 | `retrieve_memory` | `(key: str)` | Fetch the full content of a specific memory by exact key |
 | `store_memory` | `(key: str, content: str, tags: str)` | Create or update a memory |
 | `search_memories` | `(query: str)` | Content-based keyword/semantic search across all memories |
 | `list_recent_memories` | *(no args)* | Return the 10 most recently updated memories |
+| `delete_memory` | `(key: str)` | Delete a memory permanently by key |
+| `get_memory_stats` | *(no args)* | Get total memory count, character count, and storage path |
+| `export_memories` | *(no args)* | Export all memories as a JSON array |
 
 ### Recommended Agent Directive
 
@@ -185,6 +200,19 @@ Ideal for OpenCode, web apps, or any client that prefers HTTP transport:
 }
 ```
 
+### Option 4: Docker
+Use `mcp_config.docker.example.json` or point your client to the container:
+```json
+{
+  "mcpServers": {
+    "context-keep": {
+      "transport": "sse",
+      "url": "http://localhost:5100/sse"
+    }
+  }
+}
+```
+
 ---
 
 ## 🌐 Web Dashboard
@@ -197,6 +225,7 @@ ContextKeep ships with a full-featured web UI to manage your memories without to
 *   **Calendar View:** Browse your memory history by month
 *   **Search:** Real-time filtering across titles, keys, and content
 *   **Full CRUD:** Create, view, edit, and delete memories from the browser
+*   **Export:** Download all memories as JSON with one click (`Ctrl+E`)
 
 **To start manually:**
 ```bash
@@ -231,6 +260,20 @@ sudo systemctl restart contextkeep-webui
 
 ## 📋 Changelog
 
+### V1.3 — Harbor
+- ✅ **Docker Support** — Dockerfile + docker-compose.yml for one-command deployment
+- ✅ **Modern Packaging** — `pyproject.toml` + `uv` support alongside pip
+- ✅ New MCP tool: `delete_memory()` — agents can now delete memories
+- ✅ New MCP tool: `get_memory_stats()` — memory count & size at a glance
+- ✅ New MCP tool: `export_memories()` — full backup as JSON
+- ✅ WebUI: Export All button with `Ctrl+E` shortcut
+- ✅ WebUI: Stats API endpoint
+- ✅ Fix: Removed dead code in `memory_manager.py`
+- ✅ Fix: Added missing `core/__init__.py` for Docker/package imports
+- ✅ Fix: Bare `except` replaced with `except Exception`
+- ✅ Updated installer to V1.3 with `uv` detection
+- ✅ Community contributors credited 🙏
+
 ### V1.2 — Obsidian Lab
 - ✅ New `list_all_memories()` MCP tool — complete memory directory in one call
 - ✅ Obsidian Lab UI redesign — dark premium aesthetic with cyan/neon accents
@@ -248,7 +291,7 @@ sudo systemctl restart contextkeep-webui
 
 ### V1.0
 - Core MCP server with `store_memory`, `retrieve_memory`, `search_memories`
-- SQLite-backed persistent storage
+- JSON-backed persistent storage
 - SSH remote transport support
 
 ---
@@ -256,6 +299,15 @@ sudo systemctl restart contextkeep-webui
 ## 🤝 Contributing
 
 Contributions are welcome. Open a PR, file an issue, or suggest a feature — all input is appreciated.
+
+### V1.3 Community Contributors
+
+A huge thank you to everyone who contributed to the Harbor release:
+
+- **[@shuft](https://github.com/shuft)** — Opened [Issue #1](https://github.com/mordang7/ContextKeep/issues/1) requesting Docker support
+- **[@Cyberdogs7](https://github.com/Cyberdogs7)** — [PR #2](https://github.com/mordang7/ContextKeep/pull/2): Initial Docker & Docker Compose implementation
+- **[@frehov](https://github.com/frehov)** — [PR #3](https://github.com/mordang7/ContextKeep/pull/3): Dockerfile, `pyproject.toml`, `uv` support, `__init__.py` fix
+- **[@thinkstylestudio](https://github.com/thinkstylestudio)** — Community advocacy
 
 ## ☕ Support the Project
 

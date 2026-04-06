@@ -52,7 +52,7 @@ class MemoryManager:
                     memory_data["created_at"] = existing.get("created_at", now)
                     if not title:
                         memory_data["title"] = existing.get("title", key)
-            except:
+            except Exception:
                 pass  # Overwrite if corrupt
 
         with open(file_path, "w", encoding="utf-8") as f:
@@ -70,17 +70,7 @@ class MemoryManager:
             with open(file_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
                 return data
-        except Exception as e:
-            # Silently fail - don't print to stdout as it corrupts MCP stdio transport
-            return None
-
-        try:
-            with open(file_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-                print(f"DEBUG: loaded data for key={key}")
-                return data
-        except Exception as e:
-            print(f"DEBUG: exception loading {key}: {e}")
+        except Exception:
             # Silently fail - don't print to stdout as it corrupts MCP stdio transport
             return None
 
@@ -101,7 +91,7 @@ class MemoryManager:
                     if "title" not in data:
                         data["title"] = data["key"]
                     memories.append(data)
-            except:
+            except Exception:
                 continue
 
         # Sort by updated_at descending

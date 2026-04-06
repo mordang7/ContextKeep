@@ -1,4 +1,4 @@
-/* ContextKeep V1.2 — "Obsidian Lab" Design System */
+/* ContextKeep V1.3 Harbor — "Obsidian Lab" Design System */
 /* Skills applied: frontend-design (DFII 14/15 — Excellent) */
 
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
@@ -261,6 +261,25 @@ header h1 {
     background: var(--danger);
     color: white;
     border-color: var(--danger);
+}
+
+.btn-export {
+    background: rgba(16, 185, 129, 0.12);
+    color: #34d399;
+    border-color: rgba(16, 185, 129, 0.3);
+    font-weight: 500;
+}
+
+.btn-export:hover {
+    background: rgba(16, 185, 129, 0.25);
+    color: #6ee7b7;
+    border-color: rgba(16, 185, 129, 0.5);
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.15);
+}
+
+.btn-export:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 /* ─── Grid View ─── */

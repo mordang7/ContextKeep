@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-ContextKeep V1.2 - MCP Server
+ContextKeep V1.3 "Harbor" - MCP Server
 Exposes memory tools to IDEs (VS Code, Cursor, etc.)
 """
 
@@ -9,6 +9,7 @@ import sys
 import json
 import os
 import argparse
+from datetime import datetime
 from fastmcp import FastMCP
 from core.memory_manager import memory_manager
 
@@ -35,7 +36,6 @@ async def store_memory(key: str, content: str, tags: str = "", title: str = "") 
         existing = memory_manager.retrieve_memory(key)
         
         # Create timestamp
-        from datetime import datetime
         timestamp = datetime.now().astimezone().strftime('%Y-%m-%d %H:%M:%S %Z')
         
         # Append log to content
@@ -154,8 +154,66 @@ async def list_all_memories() -> str:
         raise
 
 
+@mcp.tool()
+async def delete_memory(key: str) -> str:
+    """
+    Delete a memory by its key. This action is permanent and cannot be undone.
+
+    Args:
+        key: The unique identifier of the memory to delete.
+    """
+    print(f"DEBUG: delete_memory called for key='{key}'")
+    try:
+        success = memory_manager.delete_memory(key)
+        if success:
+            print(f"DEBUG: delete_memory success for key='{key}'")
+            return f"🗑️ Memory deleted: '{key}'"
+        print(f"DEBUG: delete_memory NOT found key='{key}'")
+        return f"❌ Memory not found: '{key}'"
+    except Exception as e:
+        print(f"DEBUG: delete_memory failed: {e}")
+        raise
+
+
+@mcp.tool()
+async def get_memory_stats() -> str:
+    """Get statistics about the memory store — total count, total characters, and storage path."""
+    print("DEBUG: get_memory_stats called")
+    try:
+        stats = memory_manager.get_stats()
+        print(f"DEBUG: get_memory_stats returning {stats['total_count']} memories")
+        return (
+            f"📊 Memory Stats:\n"
+            f"   Total memories: {stats['total_count']}\n"
+            f"   Total characters: {stats['total_chars']:,}\n"
+            f"   Storage path: {stats['storage_path']}"
+        )
+    except Exception as e:
+        print(f"DEBUG: get_memory_stats failed: {e}")
+        raise
+
+
+@mcp.tool()
+async def export_memories() -> str:
+    """
+    Export all memories as a JSON string. Use this for backup or migration.
+    Returns the full content of every memory in a single JSON array.
+    """
+    print("DEBUG: export_memories called")
+    try:
+        memories = memory_manager.list_memories()
+        # Remove snippets (they're computed, not stored)
+        for mem in memories:
+            mem.pop("snippet", None)
+        print(f"DEBUG: export_memories exporting {len(memories)} memories")
+        return json.dumps(memories, indent=2, ensure_ascii=False)
+    except Exception as e:
+        print(f"DEBUG: export_memories failed: {e}")
+        raise
+
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="ContextKeep V1.2 - MCP Server")
+    parser = argparse.ArgumentParser(description="ContextKeep V1.3 Harbor - MCP Server")
     parser.add_argument(
         "--transport",
         choices=["stdio", "sse"],
@@ -187,9 +245,9 @@ if __name__ == "__main__":
     else:
         if args.transport == "sse":
             print(
-                f"🚀 Starting MCP server with SSE transport on {args.host}:{args.port}"
+                f"🚀 Starting ContextKeep V1.3 Harbor MCP server (SSE) on {args.host}:{args.port}"
             )
             mcp.run(transport="sse", host=args.host, port=args.port)
         else:
-            print("🚀 Starting MCP server with stdio transport")
+            print("🚀 Starting ContextKeep V1.3 Harbor MCP server (stdio)")
             mcp.run(transport="stdio")

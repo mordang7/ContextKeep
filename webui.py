@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 """
-ContextKeep V1.2 - WebUI Server
+ContextKeep V1.3 "Harbor" - WebUI Server
 Provides a modern web interface for memory management
 """
 
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, Response
 from datetime import datetime
 from pathlib import Path
 import sys
 import os
+import json
 
 # Add parent directory to path to import memory_manager
 sys.path.insert(0, str(Path(__file__).parent))
@@ -122,7 +123,36 @@ def search_memories():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
+@app.route('/api/stats', methods=['GET'])
+def get_stats():
+    """Get memory statistics"""
+    try:
+        stats = memory_manager.get_stats()
+        return jsonify({'success': True, 'stats': stats})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/export', methods=['GET'])
+def export_all():
+    """Export all memories as a downloadable JSON file"""
+    try:
+        memories = memory_manager.list_memories()
+        # Remove computed snippets
+        for mem in memories:
+            mem.pop("snippet", None)
+        
+        timestamp = datetime.now().strftime('%Y-%m-%d')
+        filename = f"contextkeep_backup_{timestamp}.json"
+        
+        return Response(
+            json.dumps(memories, indent=2, ensure_ascii=False),
+            mimetype='application/json',
+            headers={'Content-Disposition': f'attachment; filename={filename}'}
+        )
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 if __name__ == '__main__':
-    print("🌐 Starting ContextKeep V1.2 WebUI...")
+    print("🌐 Starting ContextKeep V1.3 Harbor WebUI...")
     print("📍 Access at: http://localhost:5000")
     app.run(host='0.0.0.0', port=5000, debug=True)

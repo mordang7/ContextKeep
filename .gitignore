@@ -17,6 +17,7 @@ logs/
 Thumbs.db
 
 # Internal Documentation
+docs/
 DOCUMENTATION.md
 AGENTS.md
 GEMINI.md
