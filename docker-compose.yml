@@ -5,7 +5,7 @@ services:
     ports:
       - "5100:5100"
     volumes:
-      - contextkeep-data:/app/data
+      - ./data:/app/data
     restart: unless-stopped
 
   webui:
@@ -14,10 +14,7 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - contextkeep-data:/app/data
+      - ./data:/app/data
     depends_on:
       - mcp-server
     restart: unless-stopped
-
-volumes:
-  contextkeep-data:
