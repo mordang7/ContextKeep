@@ -1,18 +1,19 @@
 [project]
 name = "contextkeep"
-version = "1.3.0"
-description = "Infinite Long-Term Memory for AI Agents"
+version = "2.1.0"
+description = "Long-term memory for AI agents, powered by SQLite, FTS5, and user-editable categories"
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.10"
 dependencies = [
-    "flask",
-    "fastmcp",
+    "flask>=3.0,<4.0",
+    "fastmcp>=2.12,<3.0",
 ]
 
 [project.scripts]
 contextkeep-server = "server:main"
 contextkeep-webui = "webui:main"
+contextkeep-migrate = "migrate:main"
 
 [build-system]
 requires = ["hatchling"]

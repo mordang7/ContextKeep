@@ -1,7 +1,7 @@
 {
   "mcpServers": {
     "context-keep": {
-      "url": "http://localhost:5100/mcp"
+      "url": "http://localhost:5100/sse"
     }
   }
 }

@@ -1,10 +1,7 @@
 {
-    "mcpServers": {
-        "context-keep": {
-            "command": "/path/to/contextkeep/venv/bin/python",
-            "args": [
-                "/path/to/contextkeep/server.py"
-            ]
-        }
+  "mcpServers": {
+    "context-keep": {
+      "url": "http://localhost:5100/mcp"
     }
+  }
 }

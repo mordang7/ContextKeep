@@ -1,12 +1,13 @@
 [Unit]
-Description=ContextKeep V1.0 - Memory Management Web Service
+Description=ContextKeep V2.1 WebUI
 After=network.target
 
 [Service]
 Type=simple
 User={{USER}}
 WorkingDirectory={{WORKDIR}}
-ExecStart="{{WORKDIR}}/venv/bin/python" webui.py
+Environment=CONTEXTKEEP_DB_PATH={{WORKDIR}}/data/contextkeep.db
+ExecStart={{PYTHON}} webui.py --host 0.0.0.0 --port 5000
 Restart=always
 RestartSec=10
 StandardOutput=append:{{WORKDIR}}/logs/contextkeep_webui.log

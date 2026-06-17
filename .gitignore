@@ -10,14 +10,27 @@ env/
 # Data and Logs
 data/
 logs/
+backups/
+backups_test/
+restore_test/
 *.log
+*.db
+*.db-wal
+*.db-shm
+contextkeep_*_backup_*.zip
 
 # System
 .DS_Store
 Thumbs.db
 
 # Internal Documentation
-docs/
+docs/*
+!docs/CLIENT_CONFIGURATION.md
+!docs/DIRECTIVE_UPDATE.md
+!docs/DOCKER_V2_1.md
+!docs/MIGRATION_GUIDE.md
+!docs/SAFE_UPGRADE.md
+!docs/UPGRADING_FROM_V1.md
 DOCUMENTATION.md
 AGENTS.md
 GEMINI.md
@@ -30,4 +43,3 @@ mcp_config.json
 # Showcase backups and editable sources
 Showcase_backup_*.png
 *.af
-

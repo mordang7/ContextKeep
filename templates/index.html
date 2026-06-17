@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ContextKeep V1.3 Harbor - Memory Manager</title>
+    <title>ContextKeep V2.1 Atlas - Memory Manager</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -16,16 +16,20 @@
         <header>
             <div class="header-inner">
                 <div class="logo-block">
-                    <span class="logo-icon">🧠</span>
+                    <span class="logo-icon">CK</span>
                     <div>
                         <h1>ContextKeep</h1>
-                        <p class="subtitle">Memory Manager <span class="version-badge">V1.3</span></p>
+                        <p class="subtitle">Memory Manager <span class="version-badge">V2.1 Atlas</span></p>
                     </div>
                 </div>
                 <div class="header-stats">
                     <div class="stat-chip">
                         <span class="stat-label">Memories</span>
-                        <span class="stat-value" id="memoryCount">—</span>
+                        <span class="stat-value" id="memoryCount">0</span>
+                    </div>
+                    <div class="stat-chip">
+                        <span class="stat-label">Categories</span>
+                        <span class="stat-value" id="categoryCount">0</span>
                     </div>
                 </div>
             </div>
@@ -37,83 +41,166 @@
                 <input type="text" id="searchInput" placeholder="Search by title, key, or content..." />
             </div>
             <div class="view-controls">
-                <button id="gridViewBtn" class="btn btn-view active" title="Grid View">⊞ Grid</button>
-                <button id="listViewBtn" class="btn btn-view" title="List View">☰ List</button>
-                <button id="calendarViewBtn" class="btn btn-view" title="Calendar View">📅 Calendar</button>
+                <button id="gridViewBtn" class="btn btn-view active" title="Grid View">Grid</button>
+                <button id="listViewBtn" class="btn btn-view" title="List View">List</button>
+                <button id="calendarViewBtn" class="btn btn-view" title="Calendar View">Calendar</button>
                 <button id="newMemoryBtn" class="btn btn-primary">+ New Memory</button>
-                <button id="exportAllBtn" class="btn btn-export" title="Export all memories as JSON (Ctrl+E)">⬇ Export</button>
+                <button id="exportAllBtn" class="btn btn-export" title="Export all memories as JSON (Ctrl+E)">Export</button>
+                <button id="infoBtn" class="btn btn-secondary" title="Server info">Info</button>
             </div>
         </div>
 
-        <div id="memoriesContainer" class="memories-grid">
-            <!-- Memory cards will be injected here -->
-        </div>
+        <main class="app-shell">
+            <aside class="category-sidebar">
+                <div class="sidebar-header">
+                    <span>Categories</span>
+                    <button id="addCategoryBtn" class="icon-btn" title="Add category">+</button>
+                </div>
+                <button id="allCategoriesBtn" class="category-row active" data-category="">
+                    <span class="category-icon">all</span>
+                    <span class="category-name">All Memories</span>
+                    <span class="category-count" id="allCount">0</span>
+                </button>
+                <div id="categoryList" class="category-list"></div>
+            </aside>
 
-        <div id="calendarContainer" class="calendar-view" style="display: none;">
-            <div class="calendar-nav">
-                <button id="calPrevBtn" class="btn btn-view" onclick="prevMonth()">‹ Prev</button>
-                <h2 id="calMonthLabel" class="cal-month-title"></h2>
-                <button id="calNextBtn" class="btn btn-view" onclick="nextMonth()">Next ›</button>
-            </div>
-            <div id="calendarGrid"></div>
-        </div>
+            <section class="memory-panel">
+                <div class="panel-header">
+                    <div>
+                        <h2 id="panelTitle">All Memories</h2>
+                        <p id="panelSubtitle">Browse, search, and organize long-term memory.</p>
+                    </div>
+                    <button id="loadMoreBtn" class="btn btn-secondary" style="display: none;">Load More</button>
+                </div>
+
+                <div id="memoriesContainer" class="memories-grid"></div>
+
+                <div id="calendarContainer" class="calendar-view" style="display: none;">
+                    <div class="calendar-nav">
+                        <button id="calPrevBtn" class="btn btn-view">Prev</button>
+                        <h2 id="calMonthLabel" class="cal-month-title"></h2>
+                        <button id="calNextBtn" class="btn btn-view">Next</button>
+                    </div>
+                    <div id="calendarGrid"></div>
+                </div>
+            </section>
+        </main>
     </div>
 
-    <!-- New Memory Modal -->
     <div id="newMemoryModal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
+            <button class="close" data-close>&times;</button>
             <h2>Create New Memory</h2>
             <label class="field-label">Key <span class="field-hint">(unique identifier)</span></label>
-            <input type="text" id="newKey" class="edit-title" placeholder="e.g. GJ_Project_Notes" />
+            <input type="text" id="newKey" class="edit-title" placeholder="e.g. Project_Notes" />
             <label class="field-label">Title</label>
             <input type="text" id="newTitle" class="edit-title" placeholder="Human-readable name" />
+            <label class="field-label">Categories</label>
+            <div id="newCategorySelect" class="category-select"></div>
             <label class="field-label">Content</label>
             <textarea id="newContent" class="edit-content" placeholder="Memory content..."></textarea>
             <div class="modal-actions">
                 <button id="saveNewBtn" class="btn btn-primary">Create Memory</button>
-                <button class="btn btn-secondary close">Cancel</button>
+                <button class="btn btn-secondary" data-close>Cancel</button>
             </div>
         </div>
     </div>
 
-    <!-- View Modal -->
     <div id="viewModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
+        <div class="modal-content modal-content--wide">
+            <button class="close" data-close>&times;</button>
             <h2 id="viewTitle"></h2>
             <p class="meta"><strong>Key:</strong> <span id="viewKey" class="mono-text"></span></p>
             <p class="meta"><strong>Updated:</strong> <span id="viewTimestamp"></span></p>
+            <div id="viewCategories" class="card-tags modal-tags"></div>
+            <button id="revealMemoryBtn" class="btn btn-danger reveal-btn" style="display: none;">Reveal Credential Content</button>
             <div id="viewContent" class="content-area"></div>
+            <h3 class="section-title">History</h3>
+            <div id="viewHistory" class="history-list"></div>
         </div>
     </div>
 
-    <!-- Edit Modal -->
     <div id="editModal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
+            <button class="close" data-close>&times;</button>
             <h2>Edit Memory</h2>
             <label class="field-label">Title</label>
             <input type="text" id="editTitle" class="edit-title" placeholder="Title" />
+            <label class="field-label">Categories</label>
+            <div id="editCategorySelect" class="category-select"></div>
             <label class="field-label">Content</label>
             <textarea id="editContent" class="edit-content" placeholder="Content"></textarea>
             <div class="modal-actions">
                 <button id="saveEditBtn" class="btn btn-primary">Save Changes</button>
-                <button class="btn btn-secondary close">Cancel</button>
+                <button class="btn btn-secondary" data-close>Cancel</button>
             </div>
         </div>
     </div>
 
-    <!-- Delete Confirmation Modal -->
     <div id="deleteModal" class="modal">
         <div class="modal-content modal-content--narrow">
-            <h2>⚠️ Confirm Deletion</h2>
-            <p class="delete-warning">This action cannot be undone.</p>
+            <h2>Confirm Deletion</h2>
+            <p class="delete-warning">This memory will be permanently deleted.</p>
             <p class="delete-target"><strong id="deleteTitle"></strong></p>
             <div class="modal-actions">
                 <button id="confirmDeleteBtn" class="btn btn-danger">Delete Permanently</button>
-                <button class="btn btn-secondary close">Cancel</button>
+                <button class="btn btn-secondary" data-close>Cancel</button>
             </div>
+        </div>
+    </div>
+
+    <div id="categoryModal" class="modal">
+        <div class="modal-content modal-content--narrow">
+            <button class="close" data-close>&times;</button>
+            <h2 id="categoryModalTitle">Category</h2>
+            <label class="field-label">Name</label>
+            <input type="text" id="categoryName" class="edit-title" placeholder="Category name" />
+            <label class="field-label">Icon Label</label>
+            <input type="text" id="categoryIcon" class="edit-title" placeholder="folder, project, lock..." />
+            <label class="field-label">Description</label>
+            <textarea id="categoryDescription" class="edit-content edit-content--short" placeholder="What belongs here?"></textarea>
+            <div class="modal-actions">
+                <button id="saveCategoryBtn" class="btn btn-primary">Save Category</button>
+                <button class="btn btn-secondary" data-close>Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="mergeCategoryModal" class="modal">
+        <div class="modal-content modal-content--narrow">
+            <button class="close" data-close>&times;</button>
+            <h2>Merge Category</h2>
+            <p class="delete-warning" id="mergeCategoryText"></p>
+            <label class="field-label">Merge Into</label>
+            <select id="mergeTargetSelect" class="edit-title"></select>
+            <div class="modal-actions">
+                <button id="confirmMergeBtn" class="btn btn-primary">Merge</button>
+                <button class="btn btn-secondary" data-close>Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="deleteCategoryModal" class="modal">
+        <div class="modal-content modal-content--narrow">
+            <button class="close" data-close>&times;</button>
+            <h2>Delete Category</h2>
+            <p class="delete-warning" id="deleteCategoryText"></p>
+            <div id="reassignBlock" style="display: none;">
+                <label class="field-label">Reassign Memories To</label>
+                <select id="reassignTargetSelect" class="edit-title"></select>
+            </div>
+            <div class="modal-actions">
+                <button id="confirmDeleteCategoryBtn" class="btn btn-danger">Delete Category</button>
+                <button class="btn btn-secondary" data-close>Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="infoModal" class="modal">
+        <div class="modal-content modal-content--narrow">
+            <button class="close" data-close>&times;</button>
+            <h2>ContextKeep Info</h2>
+            <div id="infoContent" class="content-area"></div>
         </div>
     </div>
 

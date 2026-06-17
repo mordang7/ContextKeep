@@ -1,7 +1,7 @@
 {
   "mcpServers": {
     "context-keep": {
-      "url": "http://localhost:5100/mcp"
+      "serverURL": "http://localhost:5100/mcp"
     }
   }
 }

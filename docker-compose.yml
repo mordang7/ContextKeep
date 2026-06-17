@@ -1,20 +1,24 @@
 services:
-  mcp-server:
+  contextkeep:
     build: .
-    command: python server.py --transport sse --host 0.0.0.0
+    image: contextkeep:v2.1
+    container_name: contextkeep-v2-1
+    command: python scripts/start_services.py --mcp-transport http --host 0.0.0.0 --mcp-port 5100 --webui-port 5000
     ports:
       - "5100:5100"
-    volumes:
-      - ./data:/app/data
-    restart: unless-stopped
-
-  webui:
-    build: .
-    command: python webui.py
-    ports:
       - "5000:5000"
+    environment:
+      CONTEXTKEEP_DB_PATH: /app/data/contextkeep.db
     volumes:
-      - ./data:/app/data
-    depends_on:
-      - mcp-server
+      - contextkeep_data:/app/data
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "scripts/healthcheck.py"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+volumes:
+  contextkeep_data:
+    name: ${CONTEXTKEEP_VOLUME_NAME:-contextkeep_v2_data}

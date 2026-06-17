@@ -2,321 +2,324 @@
 
 ![ContextKeep Banner](assets/banner.png)
 
-# ContextKeep 🧠
-### Infinite Long-Term Memory for AI Agents
+# ContextKeep
+### Long-Term Memory for AI Agents
 
-[![Version: 1.3](https://img.shields.io/badge/Version-1.3-brightgreen?style=for-the-badge)](https://github.com/mordang7/ContextKeep)
+[![Version: 2.1](https://img.shields.io/badge/Version-2.1-brightgreen?style=for-the-badge)](https://github.com/mordang7/ContextKeep)
 [![Status: Stable](https://img.shields.io/badge/Status-Stable-blue?style=for-the-badge)](https://github.com/mordang7/ContextKeep)
 [![Platform: Linux | Windows | macOS](https://img.shields.io/badge/Platform-Linux%20%7C%20Windows%20%7C%20macOS-lightgrey?style=for-the-badge)](https://github.com/mordang7/ContextKeep)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg?style=for-the-badge)](https://www.python.org/downloads/)
-[![MCP Compliant](https://img.shields.io/badge/MCP-Compliant-green.svg?style=for-the-badge)](https://modelcontextprotocol.io/)
+[![MCP Ready](https://img.shields.io/badge/MCP-Ready-green.svg?style=for-the-badge)](https://modelcontextprotocol.io/)
 [![Docker Ready](https://img.shields.io/badge/Docker-Ready-2496ED.svg?style=for-the-badge&logo=docker&logoColor=white)](https://docs.docker.com/)
-[![Ko-Fi](https://img.shields.io/badge/Ko--Fi-Support%20Me-F16061?style=flat&logo=ko-fi&logoColor=white)](https://ko-fi.com/geekj)
 
-**ContextKeep** is a powerful, standalone memory server that gives your AI agents (Claude, Cursor, Gemini, OpenCode, and more) a persistent, searchable brain. Stop repeating yourself — let your AI remember everything, permanently.
+**ContextKeep** gives AI agents a persistent, searchable memory they can use across sessions. V2.1 adds SQLite, full-text search, user-editable categories, safer Docker defaults, and verified backup-first upgrades.
 
-[Features](#-features) • [What's New in V1.3](#-whats-new-in-v13---harbor) • [Installation](#-installation) • [MCP Tools](#-mcp-tools) • [Web Dashboard](#-web-dashboard) • [Configuration](#-configuration)
+[What's New](#whats-new-in-v21-atlas) | [Safe Upgrade](#safe-upgrade-first) | [Install](#install) | [MCP Tools](#mcp-tools) | [Configuration](#mcp-client-configuration) | [Docs](#docs)
 
 </div>
 
 ---
 
-## 🌟 Features
+## Features
 
-*   **♾️ Infinite Context:** Store unlimited project details, preferences, decisions, and snippets — no expiry, no size cap.
-*   **💰 Save Money & Tokens:** Pull only the memories that matter, slashing context window usage and API costs.
-*   **🔌 Universal Compatibility:** Works with *any* MCP-compliant client via Stdio (local) or SSE (remote/homelab).
-*   **🧭 Memory Index Protocol:** A reliable two-step retrieval system — `list_all_memories()` → `retrieve_memory()` — so agents always find the right key, every time.
-*   **🖥️ Modern Web Dashboard:** Manage your memories visually with Grid, List, and Calendar views in a sleek dark interface.
-*   **🔒 Privacy First:** 100% local storage. Your data never touches an external server.
-*   **🔎 Smart Search:** Keyword and semantic search across all memory content.
-*   **🐧 Linux Service:** Runs silently in the background as a systemd service.
-*   **🐳 Docker Ready:** One-command deployment with Docker Compose.
-*   **⬇️ Export & Backup:** Export all memories as JSON via MCP tool or WebUI.
+- Persistent local memory for MCP-compatible agents.
+- SQLite storage with FTS5 full-text search.
+- User-editable categories instead of fixed tags.
+- Multiple categories per memory.
+- WebUI for browsing, editing, searching, exporting, and category management.
+- Streamable HTTP MCP endpoint at `/mcp`, with SSE fallback for older clients.
+- Docker Compose support with one default service for WebUI and MCP.
+- Verified backup and restore helpers for bare-metal and Docker upgrades.
+- Server identity checks through `get_contextkeep_info`.
 
----
+![ContextKeep Showcase](assets/Showcase.png)
 
-![ContextKeep Showcase](Showcase.png)
+## What's New In V2.1 Atlas
 
----
+V2.1 is the first category-first ContextKeep release.
 
-## 🆕 What's New in V1.3 — Harbor
+- `list_all_memories` has been removed.
+- Agents now use `list_categories` and `list_memories` before `retrieve_memory`.
+- `tags` are replaced by user-editable `categories`.
+- Memories can belong to more than one category.
+- V1 tags are preserved as `legacy_tags` migration metadata.
+- Docker now runs WebUI and MCP together by default so both use the same SQLite database.
+- `get_contextkeep_info` reports version, storage path, database ID, tool list, and migration status.
+- Upgrade scripts create verified backups before continuing.
 
-### 🐳 Docker Support
-The #1 community request. ContextKeep now ships with a `Dockerfile` and `docker-compose.yml` for one-command deployment:
+Older releases remain available through GitHub releases and tags. V2.1 is the recommended version for new installs and upgrades.
+
+## Safe Upgrade First
+
+Before replacing an existing install, use the safe upgrade wrapper. It creates a backup, verifies the archive, checks SQLite/JSON integrity, and stops if anything looks wrong.
+
+Bare-metal:
 
 ```bash
-docker compose up --build
+python scripts/upgrade_to_v2_1.py baremetal
 ```
 
-That's it. MCP server on `:5100`, WebUI on `:5000`, with persistent storage via Docker volumes.
+Docker:
 
-### 📦 Modern Python Packaging
-- **`pyproject.toml`** — canonical dependency spec for `uv`, `poetry`, or `pip`
-- **`uv` support** — the installer auto-detects `uv` and uses `uv sync` for blazing-fast setup
-- **Backwards compatible** — `pip install -r requirements.txt` still works
+```bash
+python scripts/upgrade_to_v2_1.py docker
+```
 
-### 🛠️ 3 New MCP Tools (5 → 8 total)
+V1 JSON migration:
 
-| New Tool | Purpose |
-|----------|---------|
-| `delete_memory(key)` | Agents can now delete memories directly |
-| `get_memory_stats()` | Memory count, total chars, storage path at a glance |
-| `export_memories()` | Full backup as JSON — for migration or archival |
+```bash
+python scripts/upgrade_to_v2_1.py baremetal --v1-source /path/to/old/data/memories
+```
 
-### ⬇️ WebUI Export
-- **Export All** button in the toolbar (or press `Ctrl+E`)
-- Downloads a timestamped `contextkeep_backup_YYYY-MM-DD.json`
+See [docs/SAFE_UPGRADE.md](docs/SAFE_UPGRADE.md) for backup, restore, Docker volume, and rollback details.
 
-### 🧹 Code Quality
-- Fixed dead code in `memory_manager.py` (unreachable duplicate `try/except`)
-- Added missing `core/__init__.py` for proper Python packaging
-- Replaced bare `except:` with `except Exception:` throughout
+## Install
 
----
-
-## 🚀 Installation
-
-### Option 1: Quick Start (pip)
-
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/mordang7/ContextKeep.git
-    cd ContextKeep
-    ```
-
-2.  **Run the Installer:**
-    *   **Linux/macOS:**
-        ```bash
-        python3 install.py
-        ```
-    *   **Windows:**
-        ```powershell
-        python install.py
-        ```
-
-3.  **Follow the Wizard:** The installer creates a virtual environment, installs dependencies, and generates a ready-to-use `mcp_config.json`.
-
-### Option 2: uv (Fast)
+### Fresh Bare-Metal Install
 
 ```bash
 git clone https://github.com/mordang7/ContextKeep.git
 cd ContextKeep
-uv sync
-uv run python server.py
+python -m venv .venv
 ```
 
-### Option 3: Docker (Recommended for Homelabs)
+Linux/macOS:
+
+```bash
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+Windows PowerShell:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+```
+
+You can also run the installer:
+
+```bash
+python install.py
+```
+
+### Fresh Docker Install
 
 ```bash
 git clone https://github.com/mordang7/ContextKeep.git
 cd ContextKeep
-docker compose up --build -d
+docker compose up -d --build
 ```
 
-This starts:
-| Service | Port | Purpose |
-|---------|------|---------|
-| `mcp-server` | `5100` | MCP server (SSE transport) |
-| `webui` | `5000` | Web dashboard |
+Default ports:
 
-Memories persist in a Docker volume (`contextkeep-data`).
+| Service | URL |
+|---------|-----|
+| WebUI | `http://localhost:5000` |
+| MCP HTTP | `http://localhost:5100/mcp` |
 
----
+## Run
 
-## 🛠️ MCP Tools
+Local MCP over stdio:
 
-ContextKeep exposes **8 MCP tools** to any connected agent:
-
-| Tool | Signature | Purpose |
-|------|-----------|---------| 
-| `list_all_memories` | *(no args)* | **[USE FIRST]** Returns a full directory of all memory keys, titles, tags, and timestamps |
-| `retrieve_memory` | `(key: str)` | Fetch the full content of a specific memory by exact key |
-| `store_memory` | `(key: str, content: str, tags: str)` | Create or update a memory |
-| `search_memories` | `(query: str)` | Content-based keyword/semantic search across all memories |
-| `list_recent_memories` | *(no args)* | Return the 10 most recently updated memories |
-| `delete_memory` | `(key: str)` | Delete a memory permanently by key |
-| `get_memory_stats` | *(no args)* | Get total memory count, character count, and storage path |
-| `export_memories` | *(no args)* | Export all memories as a JSON array |
-
-### Recommended Agent Directive
-
-Add this to your `GEMINI.md`, `AGENTS.md`, or `CLAUDE.md`:
-
-```markdown
-## Memory Index Protocol (MANDATORY)
-1. FIRST — call `list_all_memories()` to get the complete key directory
-2. THEN — call `retrieve_memory(exact_key)` using the exact key from step 1
-Only use `search_memories()` for content-based searches, NOT for key lookup.
+```bash
+python server.py
 ```
 
----
+Remote MCP over HTTP:
 
-## 🔌 Configuration
+```bash
+python server.py --transport http --host 0.0.0.0 --port 5100
+```
 
-Copy the contents of `mcp_config.example.json` into your AI client's config file and update the paths.
+WebUI:
 
-### Option 1: Local (Claude Desktop / Gemini CLI / Cursor)
+```bash
+python webui.py --host 0.0.0.0 --port 5000
+```
+
+Then open:
+
+```text
+http://localhost:5000
+```
+
+## MCP Tools
+
+ContextKeep V2.1 exposes 16 tools:
+
+| Tool | Purpose |
+|------|---------|
+| `get_contextkeep_info` | Confirm version, storage path, database ID, schema, tools, and migration status |
+| `list_categories` | List live user-editable categories |
+| `create_category` | Create a category when no existing category fits |
+| `update_category` | Rename or edit category metadata |
+| `delete_category` | Delete an empty category or reassign memories |
+| `merge_categories` | Merge one category into another |
+| `list_memories` | List memory keys/titles, optionally filtered by category |
+| `retrieve_memory` | Retrieve a memory by exact key |
+| `search_memories` | Full-text search memory content |
+| `list_recent_memories` | List recently updated memories |
+| `store_memory` | Store or update a memory with categories |
+| `update_categories` | Reassign one memory to one or more categories |
+| `get_edit_history` | View edit history for a memory |
+| `delete_memory` | Delete a memory permanently |
+| `get_memory_stats` | Show memory/category counts and storage path |
+| `export_memories` | Export all memories as JSON |
+
+Recommended retrieval flow:
+
+```text
+list_categories -> list_memories -> retrieve_memory
+```
+
+Use `search_memories` for topic discovery, then retrieve the exact matching memory before relying on it.
+
+## MCP Client Configuration
+
+Most clients that support streamable HTTP:
+
 ```json
 {
   "mcpServers": {
     "context-keep": {
-      "command": "/absolute/path/to/ContextKeep/venv/bin/python",
-      "args": ["/absolute/path/to/ContextKeep/server.py"]
+      "url": "http://localhost:5100/mcp"
     }
   }
 }
 ```
 
-### Option 2: Remote via SSH (Homelab / Raspberry Pi)
-Run ContextKeep on a home server and access it from any machine on your network:
+Antigravity IDE uses `serverURL`:
+
 ```json
 {
   "mcpServers": {
     "context-keep": {
-      "command": "ssh",
-      "args": [
-        "-i", "/path/to/private_key",
-        "user@192.168.1.X",
-        "'/path/to/ContextKeep/venv/bin/python'",
-        "'/path/to/ContextKeep/server.py'"
-      ]
+      "serverURL": "http://localhost:5100/mcp"
     }
   }
 }
 ```
 
-### Option 3: SSE Mode (HTTP)
-Ideal for OpenCode, web apps, or any client that prefers HTTP transport:
+SSE fallback:
+
 ```json
 {
   "mcpServers": {
     "context-keep": {
-      "transport": "sse",
       "url": "http://localhost:5100/sse"
     }
   }
 }
 ```
 
-### Option 4: Docker
-Use `mcp_config.docker.example.json` or point your client to the container:
-```json
-{
-  "mcpServers": {
-    "context-keep": {
-      "transport": "sse",
-      "url": "http://localhost:5100/sse"
-    }
-  }
-}
-```
+For a remote machine, replace `localhost` with the hostname or address of the machine running ContextKeep.
 
----
+Do not keep an old SSH/stdin config active for the same `context-keep` server name. It may launch an older server that writes to a different database than the WebUI.
 
-## 🌐 Web Dashboard
+## Verify The Right Server
 
-ContextKeep ships with a full-featured web UI to manage your memories without touching the CLI.
+After connecting a client, call `get_contextkeep_info`.
 
-*   **URL:** `http://localhost:5000`
-*   **Grid View:** Memory cards with tag chips, char counts, and inline actions
-*   **List View:** Dense, scannable table with all memories sorted by last updated
-*   **Calendar View:** Browse your memory history by month
-*   **Search:** Real-time filtering across titles, keys, and content
-*   **Full CRUD:** Create, view, edit, and delete memories from the browser
-*   **Export:** Download all memories as JSON with one click (`Ctrl+E`)
+Expected V2.1 values:
 
-**To start manually:**
-```bash
-./venv/bin/python webui.py
-```
+- `version`: `2.1.0`
+- `schema_version`: `2`
+- `storage_backend`: `sqlite`
+- `storage_path`: `/app/data/contextkeep.db` in Docker, or your configured local path
+- V2.1 tool list including `list_memories`, `list_categories`, `update_categories`, and `get_edit_history`
 
----
+If an agent stores a memory but the WebUI cannot see it, compare WebUI `/api/info` with MCP `get_contextkeep_info`. The `database_id`, `storage_path`, and memory count should match.
 
-## 🐧 Linux Service Setup (Recommended for Homelabs)
+## Backup And Restore
 
-Run both the MCP server and Web UI as persistent background services:
+Create a verified bare-metal backup:
 
 ```bash
-chmod +x install_services.sh
-./install_services.sh
+python scripts/backup_contextkeep.py baremetal --install-dir /path/to/contextkeep
 ```
 
-This installs:
+Create a verified Docker backup:
 
-| Service | Port | Purpose |
-|---------|------|---------|
-| `contextkeep-server` | `5100` | MCP server (SSE transport) |
-| `contextkeep-webui` | `5000` | Web dashboard |
-
-**Manage services:**
 ```bash
-sudo systemctl status contextkeep-server
-sudo systemctl restart contextkeep-webui
+python scripts/backup_contextkeep.py docker --volume <docker-volume-name>
 ```
 
----
+Restore commands are written into every backup folder. The full guide is in [docs/SAFE_UPGRADE.md](docs/SAFE_UPGRADE.md).
 
-## 📋 Changelog
+If you use container auto-update software, keep an external backup routine. The safe upgrade scripts can verify backups before an upgrade, but unattended image replacement cannot ask you to confirm backup health.
 
-### V1.3 — Harbor
-- ✅ **Docker Support** — Dockerfile + docker-compose.yml for one-command deployment
-- ✅ **Modern Packaging** — `pyproject.toml` + `uv` support alongside pip
-- ✅ New MCP tool: `delete_memory()` — agents can now delete memories
-- ✅ New MCP tool: `get_memory_stats()` — memory count & size at a glance
-- ✅ New MCP tool: `export_memories()` — full backup as JSON
-- ✅ WebUI: Export All button with `Ctrl+E` shortcut
-- ✅ WebUI: Stats API endpoint
-- ✅ Fix: Removed dead code in `memory_manager.py`
-- ✅ Fix: Added missing `core/__init__.py` for Docker/package imports
-- ✅ Fix: Bare `except` replaced with `except Exception`
-- ✅ Updated installer to V1.3 with `uv` detection
-- ✅ Community contributors credited 🙏
+## Docs
 
-### V1.2 — Obsidian Lab
-- ✅ New `list_all_memories()` MCP tool — complete memory directory in one call
-- ✅ Obsidian Lab UI redesign — dark premium aesthetic with cyan/neon accents
-- ✅ Memory count live badge in the header
-- ✅ Calendar month navigation (forward/back)
-- ✅ Grid cards now show tag chips and character count badges
-- ✅ Removed "Recent Memories" sidebar for a cleaner calendar layout
-- ✅ Memory Index Protocol V1.2 — standardised two-step agent retrieval pattern
+- [Safe Upgrade Guide](docs/SAFE_UPGRADE.md)
+- [V2.1 Release Notes](RELEASE_NOTES_V2.1.md)
+- [Docker V2.1 Guide](docs/DOCKER_V2_1.md)
+- [Client Configuration](docs/CLIENT_CONFIGURATION.md)
+- [Migration Guide](docs/MIGRATION_GUIDE.md)
+- [Upgrading From V1](docs/UPGRADING_FROM_V1.md)
+- [Directive Update Block](docs/DIRECTIVE_UPDATE.md)
+
+## Changelog
+
+### V2.1 Atlas
+
+- SQLite database with FTS5 search.
+- User-editable categories with multi-category memory assignment.
+- WebUI category management.
+- V1 JSON migration with legacy tag preservation.
+- One-container Docker default for shared WebUI/MCP database access.
+- `get_contextkeep_info` identity checks.
+- Verified backup and restore tooling.
+- Updated MCP client examples for HTTP, Antigravity, and SSE fallback.
+
+### V1.3 Harbor
+
+- Docker support.
+- Modern Python packaging.
+- New tools: `delete_memory`, `get_memory_stats`, `export_memories`.
+- WebUI export.
+- Packaging and code quality fixes.
+
+### V1.2 Obsidian Lab
+
+- Memory directory tool.
+- Obsidian Lab UI redesign.
+- Calendar and memory count improvements.
 
 ### V1.1
-- Web dashboard with Grid, List, and Calendar views
-- SSE transport support alongside Stdio
-- Linux systemd service installer
-- Memory titles and timestamps
+
+- Web dashboard.
+- SSE transport support.
+- Linux systemd service installer.
+- Memory titles and timestamps.
 
 ### V1.0
-- Core MCP server with `store_memory`, `retrieve_memory`, `search_memories`
-- JSON-backed persistent storage
-- SSH remote transport support
 
----
+- Core MCP server with persistent JSON-backed memory.
+- Local stdio and remote access patterns.
 
-## 🤝 Contributing
+## Contributing
 
-Contributions are welcome. Open a PR, file an issue, or suggest a feature — all input is appreciated.
+Issues, feature ideas, and pull requests are welcome. If you build a client guide, migration recipe, or workflow pattern around ContextKeep, please share it.
 
 ### V1.3 Community Contributors
 
-A huge thank you to everyone who contributed to the Harbor release:
+Thank you to everyone who contributed to the Harbor release:
 
-- **[@shuft](https://github.com/shuft)** — Opened [Issue #1](https://github.com/mordang7/ContextKeep/issues/1) requesting Docker support
-- **[@Cyberdogs7](https://github.com/Cyberdogs7)** — [PR #2](https://github.com/mordang7/ContextKeep/pull/2): Initial Docker & Docker Compose implementation
-- **[@frehov](https://github.com/frehov)** — [PR #3](https://github.com/mordang7/ContextKeep/pull/3): Dockerfile, `pyproject.toml`, `uv` support, `__init__.py` fix
-- **[@thinkstylestudio](https://github.com/thinkstylestudio)** — Community advocacy
+- [@shuft](https://github.com/shuft) opened the Docker support request.
+- [@Cyberdogs7](https://github.com/Cyberdogs7) contributed the initial Docker and Docker Compose implementation.
+- [@frehov](https://github.com/frehov) contributed Dockerfile, `pyproject.toml`, `uv` support, and packaging fixes.
+- [@thinkstylestudio](https://github.com/thinkstylestudio) supported the project through community advocacy.
 
-## ☕ Support the Project
+## Support
 
-If ContextKeep saves you time, tokens, or sanity — consider buying me a coffee.
+If ContextKeep saves you time, tokens, or context-window pain, support is appreciated.
 
 [![Ko-Fi](https://img.shields.io/badge/Ko--Fi-Support%20Me-F16061?style=flat&logo=ko-fi&logoColor=white)](https://ko-fi.com/geekj)
 
 ---
 
 <div align="center">
-  <sub>Built with ❤️ by GeekJohn</sub>
+  <sub>Built by GeekJohn</sub>
 </div>
