@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import html
 import json
 import sqlite3
 from pathlib import Path
@@ -36,6 +37,10 @@ class MemoryManager:
             values = [part.strip() for part in categories.split(",")]
         else:
             values = [str(part).strip() for part in categories]
+        # Tolerate HTML-escaped names from callers (e.g. "Foo &amp; Bar"). This is
+        # not a cure - callers must still pass literal '&' - but it stops an
+        # escaped name from forking the taxonomy via exact-match lookup below.
+        values = [html.unescape(value) for value in values]
         seen: set[str] = set()
         parsed: list[str] = []
         for value in values:
@@ -64,6 +69,7 @@ class MemoryManager:
         icon: str = "folder",
         is_starter: bool = False,
     ) -> dict[str, Any]:
+        name = html.unescape(name)
         existing = self._get_category_by_name(name)
         if existing:
             return existing
