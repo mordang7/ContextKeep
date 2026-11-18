@@ -13,7 +13,7 @@ from typing import Optional
 from .categories import STARTER_CATEGORIES
 
 
-APP_VERSION = "2.1.0"
+APP_VERSION = "2.1.1"
 SCHEMA_VERSION = "2"
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 

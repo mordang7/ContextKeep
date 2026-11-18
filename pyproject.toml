@@ -1,6 +1,6 @@
 [project]
 name = "contextkeep"
-version = "2.1.0"
+version = "2.1.1"
 description = "Long-term memory for AI agents, powered by SQLite, FTS5, and user-editable categories"
 readme = "README.md"
 license = {text = "MIT"}
