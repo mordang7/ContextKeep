@@ -1,0 +1,154 @@
+name: Release
+
+# Append-only release automation.
+#
+# On every push to main that changes shipped application code, this workflow:
+#   1. runs the test suite,
+#   2. bumps the patch version in core/database.py and pyproject.toml,
+#   3. commits the bump to main,
+#   4. tags that commit as vX.Y.Z and publishes a GitHub Release with
+#      auto-generated notes.
+#
+# Existing tags and releases are NEVER modified or deleted. The workflow only
+# creates new ones, so the Releases page keeps the full version history.
+# Manual, deliberate minor/major releases can still be created from the GitHub
+# UI; this workflow will simply bump past whatever version is on main.
+#
+# Pushes made with the repository GITHUB_TOKEN do not re-trigger workflows, and
+# the bump commit additionally carries [skip ci] and is ignored by the guard
+# below, so the automation cannot loop on itself.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "core/**"
+      - "server.py"
+      - "webui.py"
+      - "migrate.py"
+      - "install.py"
+      - "install_services.sh"
+      - "templates/**"
+      - "static/**"
+      - "requirements.txt"
+      - "pyproject.toml"
+      - "Dockerfile"
+      - "docker-compose.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-main
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: bump and publish
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      !startsWith(github.event.head_commit.message, 'chore(release):')
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Test before releasing
+        run: python -m unittest discover -s tests -v
+
+      - name: Bump patch version
+        id: bump
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          current=$(python - <<'PY'
+          import pathlib, re
+          text = pathlib.Path("core/database.py").read_text(encoding="utf-8")
+          match = re.search(r'APP_VERSION\s*=\s*"([^"]+)"', text)
+          if not match:
+              raise SystemExit("APP_VERSION not found in core/database.py")
+          print(match.group(1))
+          PY
+          )
+
+          new=$(python - "$current" <<'PY'
+          import sys
+          parts = sys.argv[1].split(".")
+          if len(parts) != 3 or not all(part.isdigit() for part in parts):
+              raise SystemExit(f"APP_VERSION is not a numeric X.Y.Z version: {sys.argv[1]}")
+          parts[-1] = str(int(parts[-1]) + 1)
+          print(".".join(parts))
+          PY
+          )
+
+          if git rev-parse -q --verify "refs/tags/v$new" >/dev/null; then
+              echo "::error::Tag v$new already exists; refusing to reuse or move it."
+              exit 1
+          fi
+
+          python - "$new" <<'PY'
+          import pathlib, re, sys
+          new = sys.argv[1]
+          targets = [
+              ("core/database.py", r'(APP_VERSION\s*=\s*")[^"]+(")'),
+              ("pyproject.toml", r'(?m)^(version\s*=\s*")[^"]+(")$'),
+          ]
+          for path, pattern in targets:
+              file = pathlib.Path(path)
+              text = file.read_text(encoding="utf-8")
+              updated, count = re.subn(pattern, lambda m: m.group(1) + new + m.group(2), text, count=1)
+              if count != 1:
+                  raise SystemExit(f"Could not update version in {path}")
+              file.write_text(updated, encoding="utf-8")
+          print(new)
+          PY
+
+          echo "version=$new" >> "$GITHUB_OUTPUT"
+          echo "Bumping v$current -> v$new"
+
+      - name: Commit and push version bump
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="${{ steps.bump.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add core/database.py pyproject.toml
+          git commit -m "chore(release): v$version [skip ci]"
+          git push origin HEAD:main
+
+      - name: Publish GitHub Release
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="${{ steps.bump.outputs.version }}"
+          for attempt in 1 2 3; do
+            if gh release create "v$version" \
+                 --title "ContextKeep v$version" \
+                 --generate-notes \
+                 --target "$(git rev-parse HEAD)"; then
+              echo "Published v$version"
+              exit 0
+            fi
+            echo "Release attempt $attempt failed; retrying in 10s..."
+            sleep 10
+          done
+          echo "::error::Could not publish release v$version after 3 attempts."
+          exit 1
